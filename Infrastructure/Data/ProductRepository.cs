@@ -2,8 +2,9 @@
 using core.Entities;
 using core.Interfaces;
 using Microsoft.EntityFrameworkCore;
-namespace Infrastructure.Data
-{
+
+namespace Infrastructure.Data;
+
     public class ProductRepository : IProductRepository
     {
         private readonly StoreContext _context;
@@ -22,4 +23,3 @@ namespace Infrastructure.Data
 
         public async Task<IReadOnlyList<ProductType>> GetProductTypeAsync() => await _context.ProductTypes.ToListAsync();
     }
-}
