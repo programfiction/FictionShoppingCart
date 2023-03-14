@@ -1,4 +1,5 @@
 using System;
+using api.Middleware;
 using core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -18,21 +19,23 @@ builder.Services.AddDbContext<StoreContext>(opt =>
 
 //services added
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>)); //generic repostory 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>)); //generic repostory 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    // app.UseSwaggerUI();
+
 }
 app.UseStaticFiles();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 using var scope = app.Services.CreateScope();
@@ -44,7 +47,7 @@ try
     await context.Database.MigrateAsync();
     await StoreContextSeed.SeedAsync(context);
 }
-catch(Exception ex)
+catch (Exception ex)
 {
     logger.LogError(ex, "An migration error occurred");
 }
