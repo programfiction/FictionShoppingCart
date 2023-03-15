@@ -7,6 +7,7 @@ using core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace api.Extensions
 {
@@ -41,6 +42,10 @@ namespace api.Extensions
                     };
                     return new BadRequestObjectResult(errorResponse);
                 };
+            });
+            services.AddCors( policy =>
+            {
+               policy.AddPolicy("CorsPolicy", options => options.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200")); 
             });
             return services;
         }
