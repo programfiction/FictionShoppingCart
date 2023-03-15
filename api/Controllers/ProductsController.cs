@@ -4,6 +4,7 @@ using core.Interfaces;
 using core.Specifications;
 using api.Dtos;
 using AutoMapper;
+using api.Errors;
 
 namespace api.Controllers;
 
@@ -30,7 +31,7 @@ public class ProductsController : BaseApiController
         var spec = new ProductsWithTypesAndBrandsSpecification();
         var products = await _productRepo.ListAsync(spec);
 
-        return Ok(_mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturnDto>>(products));
+        return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products));
     }
     // [HttpGet]
     // public async Task<ActionResult<Product>> GetProducts() => Ok(await _productRepo.ListAsync(new ProductsWithTypesAndBrandsSpecification()));
@@ -39,10 +40,13 @@ public class ProductsController : BaseApiController
     // [HttpGet("{id}")]
     // public async Task<ActionResult<Product>> GetProduct(int id) => Ok(await _productRepo.GetEntityWithSpec(new ProductsWithTypesAndBrandsSpecification(id)));
     [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
     {
         var product = await _productRepo.GetEntityWithSpec(new ProductsWithTypesAndBrandsSpecification(id));
-        return  _mapper.Map<Product,ProductToReturnDto>(product);
+        if (product == null) return NotFound(new ApiResponse(404));
+        return _mapper.Map<Product, ProductToReturnDto>(product);
     }
     [HttpGet("brands")]
     public async Task<ActionResult<ProductBrand>> GetProductBrands() => Ok(await _brandRepo.ListAsync(new ProductBrandsSpecification()));
