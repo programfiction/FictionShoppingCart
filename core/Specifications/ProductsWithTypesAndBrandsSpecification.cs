@@ -10,30 +10,31 @@ namespace core.Specifications;
 public class ProductsWithTypesAndBrandsSpecification : BaseSpecification<Product>
 {
     public ProductsWithTypesAndBrandsSpecification(ProductSpecParams productParams) : base(x =>
-        (string.IsNullOrEmpty(productParams.Search)||x.Name.ToLower().Contains(productParams.Search)) &&
+        (string.IsNullOrEmpty(productParams.Search) || x.Name.ToLower().Contains(productParams.Search)) &&
         (!productParams.BrandId.HasValue || x.ProductBrandId == productParams.BrandId) &&
         (!productParams.TypeId.HasValue || x.ProductTypeId == productParams.TypeId)
     )
     {
         AddInclude(x => x.ProductType);
         AddInclude(x => x.ProductBrand);
+        AddOrderBy(p => p.Name);
         AddPaging(productParams.PageSize * (productParams.PageIndex - 1), productParams.PageSize);
         if (!string.IsNullOrEmpty(productParams.Sort))
         {
             switch (productParams.Sort)
             {
-                case "PriceAsc":
+                case "priceAsc":
                     AddOrderBy(p => p.Price);
                     break;
 
-                case "PriceDesc":
+                case "priceDesc":
                     AddOrderByDesc(p => p.Price);
                     break;
-                case "NameAsc":
+                case "nameAsc":
                     AddOrderBy(p => p.Name);
                     break;
 
-                case "NameDesc":
+                case "nameDesc":
                     AddOrderByDesc(p => p.Name);
                     break;
 
