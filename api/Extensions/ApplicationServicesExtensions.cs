@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using api.Errors;
 using core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
+using StackExchange.Redis;
 namespace api.Extensions
 {
     public static class ApplicationServicesExtensions
@@ -23,6 +19,12 @@ namespace api.Extensions
             });
 
             //services added
+            services.AddSingleton<IConnectionMultiplexer>(c =>
+            {
+                var options = ConfigurationOptions.Parse(config.GetConnectionString("Redis"));
+                return ConnectionMultiplexer.Connect(options);
+            });
+            services.AddScoped<IBasketRepository, BasketRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>)); //generic repostory 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -43,9 +45,9 @@ namespace api.Extensions
                     return new BadRequestObjectResult(errorResponse);
                 };
             });
-            services.AddCors( policy =>
+            services.AddCors(policy =>
             {
-               policy.AddPolicy("CorsPolicy", options => options.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200")); 
+                policy.AddPolicy("CorsPolicy", options => options.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             });
             return services;
         }
